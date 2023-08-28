@@ -7,9 +7,13 @@ namespace Todo.Contollers
     {
         //action
         [HttpGet("/")]
-        public string Get()
+        public List<TodoModel> Get
+        (
+            [FromServices] AppDbContext context
+        )
         {
-            return "Hello World!";
+            // está retornando todas as tarefas
+            return context.Todo.ToList();
         }
     }
 }

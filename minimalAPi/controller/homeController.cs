@@ -8,15 +8,16 @@ namespace Todo.Contollers
         //action
         [HttpGet("/")]
         public List<TodoModel> Get([FromServices] AppDbContext context)
-        {
-            // está retornando todas as tarefas
-            return context.Todo.ToList();
-        }
+            => context.Todo.ToList();
+
         [HttpGet("/{id}")]
-        public TodoModel GetByid([FromServices] AppDbContext context, int id)
+        public IActionResult GetByid([FromServices] AppDbContext context, int id)
         {
             // está retornando uma tarefa
-            return context.Todo.Find(id);
+            var todo = context.Todo.Find(id);
+            if(todo == null)
+                return NotFound();
+            return Created($"/{todo.Id}", todo);
         }
         [HttpPost("/")]
         public TodoModel Post(
@@ -29,23 +30,29 @@ namespace Todo.Contollers
             return model;
         }
         [HttpPut("/{id}")]
-        public TodoModel Put([FromRoute] int id, [FromBody] TodoModel model, [FromServices] AppDbContext context)
+        public IActionResult Put([FromRoute] int id, [FromBody] TodoModel model, [FromServices] AppDbContext context)
         {
             // está atualizando uma tarefa
             var todo = context.Todo.Find(id);
+            if(todo == null)
+                return NotFound();
+
             todo.Title = model.Title;
             todo.Done = model.Done;
             context.Todo.Update(todo);
             context.SaveChanges();
-            return todo;
+            return Ok(todo);
         }
         [HttpDelete("/{id}")]
-        public TodoModel Delete(int id, [FromServices] AppDbContext context)
+        public IActionResult Delete(int id, [FromServices] AppDbContext context)
         {
             var todo = context.Todo.Find(id);
+            if(todo == null)
+                return NotFound();
+
             context.Todo.Remove(todo);
             context.SaveChanges();
-            return todo;
+            return Ok(todo);
         }
     }
 }
